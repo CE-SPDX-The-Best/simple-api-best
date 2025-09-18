@@ -10,7 +10,7 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build') {
+        stage('VM1') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
@@ -36,6 +36,23 @@ pipeline {
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
                         docker tag simple-api:latest ghcr.io/ce-spdx-the-best/simple-api:latest
                         docker push ghcr.io/ce-spdx-the-best/simple-api:latest
+                        "
+                        '''
+                    }
+                }
+            }
+        }
+        stage('VM2') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
+                    sshagent (credentials: ['ssh-key']) {
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no admin@192.168.1.61 "
+                        echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
+                        docker pull ghcr.io/ce-spdx-the-best/simple-api:latest
+                        docker stop simple-api || true
+                        docker run -d -p 5000:5000 --name simple-api ghcr.io/ce-spdx-the-best/simple-api:latest
+                        ./wait-for-it.sh localhost:5000 -t 30 -- echo "Service is up"
                         "
                         '''
                     }
