@@ -27,7 +27,12 @@ pipeline {
                         # สร้าง/อัปเดต image และ start service
                         docker compose up -d --build
                         ./wait-for-it.sh localhost:5000 -t 30 -- echo "Service is up"
-                        python3 
+                        simple-env/bin/pip install -r requirements.txt
+                        simple-env/bin/python3 -m unittest unit_test.py
+                        cd ~/simple-api-robot
+                        git pull origin main
+                        robot-env/bin/pip install -r requirements.txt
+                        robot-env/bin/robot robot-test.robot
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
                         docker push ghcr.io/ce-spdx-the-best/simple-api:latest
                         "
