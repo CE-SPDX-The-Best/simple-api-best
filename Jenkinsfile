@@ -22,11 +22,11 @@ pipeline {
                         cd simple-api
                         docker compose down
                         git pull origin main
-                        mv ../wait-for-it.sh .
                         
                         # สร้าง/อัปเดต image และ start service
                         docker compose up -d --build
                         ./wait-for-it.sh localhost:5000 -t 30 -- echo "Service is up"
+                        docker image prune -a -f
                         simple-env/bin/pip install -r requirements.txt
                         simple-env/bin/python3 -m unittest unit_test.py
                         cd ~/simple-api-robot
