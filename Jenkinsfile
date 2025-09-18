@@ -49,9 +49,10 @@ pipeline {
                         sh '''
                         ssh -o StrictHostKeyChecking=no admin@192.168.1.61 "
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
+                        docker rmi simple-api:latest || true
                         docker pull ghcr.io/ce-spdx-the-best/simple-api:latest
                         docker stop simple-api || true
-                        docker run -d -p 5000:5000 --name simple-api ghcr.io/ce-spdx-the-best/simple-api:latest
+                        docker run -d -p 5000:5000 --name simple-api --rm ghcr.io/ce-spdx-the-best/simple-api:latest
                         ./wait-for-it.sh localhost:5000 -t 30 -- echo "Service is up"
                         "
                         '''
