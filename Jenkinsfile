@@ -34,6 +34,7 @@ pipeline {
                         robot-env/bin/pip install -r requirements.txt
                         robot-env/bin/robot robot-test.robot
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
+                        docker tag simple-api:latest ghcr.io/ce-spdx-the-best/simple-api:latest
                         docker push ghcr.io/ce-spdx-the-best/simple-api:latest
                         "
                         '''
