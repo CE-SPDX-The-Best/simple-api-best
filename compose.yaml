@@ -1,6 +1,7 @@
 services:
   simple-api:
     build: .
+    image: simple-api:latest
     ports:
       - "5000:5000"
     container_name: simple-api
