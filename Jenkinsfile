@@ -10,12 +10,12 @@ pipeline {
                 checkout scm
             }
         }
-        stage('VM1') {
+        stage('VM2') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no admin@192.168.1.56 "
+                        ssh -o StrictHostKeyChecking=no admin@192.168.56.105 "
                         # ไปที่ home directory
                         cd ~
                         # เข้าไปที่ project
@@ -42,12 +42,12 @@ pipeline {
                 }
             }
         }
-        stage('VM2') {
+        stage('VM3') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no admin@192.168.1.61 "
+                        ssh -o StrictHostKeyChecking=no admin@192.168.56.106 "
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
                         docker stop simple-api || true
                         docker rmi ghcr.io/ce-spdx-the-best/simple-api:latest || true
