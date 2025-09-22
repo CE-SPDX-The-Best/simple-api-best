@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/getcode', methods=['GET'])
 def welcome():
-	return jsonify({'message': 'Hello, SDPX The Best!'})
+	return jsonify({'message': 'Hello, World!'})
 
 @app.route('/plus/<string:n1>/<string:n2>', methods=['GET'])
 def plus(n1, n2):
