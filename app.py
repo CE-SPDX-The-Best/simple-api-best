@@ -6,7 +6,7 @@ app = Flask(__name__)
 def is_prime(x):
 	if x == 2 or x == 3:
 		return jsonify({'message': True})
-	for i in range(2, i):
+	for i in range(2, x):
 		if x % i == 0:
 			return jsonify({'message': False})
 	return jsonify({'message': True})
