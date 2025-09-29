@@ -11,6 +11,11 @@ def plus(n1, n2):
 	n1, n2 = int(n1), int(n2)
 	return jsonify({'message': n1 + n2})
 
+@app.route('/minus/<string:n1>/<string:n2>',methods=['GET'])
+def mines(n1,n2):
+    n1,n2 = int(n1),int(n2)
+    return jsonify({'message': n1-n2})
+
 @app.route('/is_prime/<string:x>', methods=['GET'])
 def is_prime(x):
     x = int(x)
@@ -24,5 +29,8 @@ def is_prime(x):
         if x%i==0:
             return jsonify({'message': False})
     return jsonify({'message': True})
+
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=True, port=5000)
