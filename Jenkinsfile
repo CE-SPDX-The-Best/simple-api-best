@@ -12,10 +12,11 @@ pipeline {
         }
         stage('VM2') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
+                withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER'),
+                                sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no 192.168.56.105 "
+                        ssh -o StrictHostKeyChecking=no $SSH_USER@192.168.56.105 "
                         # ไปที่ home directory
                         cd ~
                         # เข้าไปที่ project
@@ -44,10 +45,11 @@ pipeline {
         }
         stage('VM3') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
+                withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER'),
+                                sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no 192.168.56.106 "
+                        ssh -o StrictHostKeyChecking=no $SSH_USER@192.168.56.106 "
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
                         docker stop simple-api || true
                         docker rmi ghcr.io/ce-spdx-the-best/simple-api:latest || true
