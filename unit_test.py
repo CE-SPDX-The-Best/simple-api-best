@@ -46,5 +46,6 @@ class MinusApiTestCase(unittest.TestCase):
 #         data = response.get_json()
 #         self.assertAlmostEqual(data['message'],True)
         
+
 if __name__ == '__main__':
     unittest.main()
