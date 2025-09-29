@@ -37,6 +37,8 @@ def is_prime(x):
 #     n1,n2 = int(n1),int(n2)
 #     return jsonify({'message': n1-n2})
 
+# สมมติ
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=True, port=5000)
