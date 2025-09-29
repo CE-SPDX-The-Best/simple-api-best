@@ -1,8 +1,8 @@
 pipeline {
     agent any
-    // triggers {
-    //     pollSCM('* * * * *') // Poll every 1 minutes; adjust as needed
-    // }
+    triggers {
+        pollSCM('* * * * *') // Poll every 1 minutes; adjust as needed
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +15,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no admin@192.168.56.105 "
+                        ssh -o StrictHostKeyChecking=no 192.168.56.105 "
                         # ไปที่ home directory
                         cd ~
                         # เข้าไปที่ project
@@ -47,7 +47,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'muyumq-github', passwordVariable: 'GIT_PSSWD', usernameVariable: 'GIT_USER')]) {
                     sshagent (credentials: ['ssh-key']) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no admin@192.168.56.106 "
+                        ssh -o StrictHostKeyChecking=no 192.168.56.106 "
                         echo $GIT_PSSWD | docker login ghcr.io -u $GIT_USER --password-stdin
                         docker stop simple-api || true
                         docker rmi ghcr.io/ce-spdx-the-best/simple-api:latest || true
