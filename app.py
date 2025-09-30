@@ -13,6 +13,12 @@ def is_prime(x):
             return jsonify({'message': False})
         return jsonify({'message': True})
 
+@app.route('/is2honor/<float:x>', methods=['GET'])
+def is2honor(x):
+    if x >= 3.25 and x < 3.5:
+        return jsonify({'message': True})
+    return jsonify({'message': False})
+
 # @app.route('/is_prime/<string:x>', methods=['GET'])
 # def is_prime(x):
 #     x = int(x)
