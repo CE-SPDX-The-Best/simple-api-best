@@ -20,7 +20,7 @@ pipeline {
                 // 'source' จะ activate venv
                 // 'pip install' จะติดตั้งลงใน venv นั้นทันที
                 sh '''
-                   source venv/bin/activate
+                   . venv/bin/activate
                    pip install -r requirements.txt
                    echo "--- Packages installed in venv: ---"
                    pip list
