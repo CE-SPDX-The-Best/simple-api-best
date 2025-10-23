@@ -84,7 +84,7 @@ pipeline {
                     // !!! สำคัญ: ต้องกลับไปที่ 'simple-api' เพื่อสั่ง 'down'
                     dir('simple-api') {
                         echo "Stopping docker-compose services..."
-                        sh 'docker-compose down'
+                        sh 'docker compose down'
                     }
                 }
             }
