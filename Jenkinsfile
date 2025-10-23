@@ -6,15 +6,35 @@ pipeline {
             steps {
                 // checkout scm
                 git credentialsId: 'muyumq-github', url: 'https://github.com/CE-SPDX-The-Best/simple-api-best.git', branch: 'main'
-                sh 'pwd'
+            }
+        }
+
+        stage('Setup Environment & Install Dependencies') {
+            steps {
+                echo "1. Creating Python virtual environment (venv)..."
+                // สร้างโฟลเดอร์ venv
+                sh 'python3 -m venv venv' 
+
+                echo "2. Activating venv and installing requirements..."
+                // รันคำสั่งใน shell session เดียว
+                // 'source' จะ activate venv
+                // 'pip install' จะติดตั้งลงใน venv นั้นทันที
+                sh '''
+                   source venv/bin/activate
+                   pip install -r requirements.txt
+                   echo "--- Packages installed in venv: ---"
+                   pip list
+                '''
             }
         }
         
-//         stage('Run Web') {
-//             steps {
-                
-//             }
-//         }
+        // stage('Build-Run Web') {
+        //     steps {
+        //         sh 'docker compose up -d --build'
+        //         sh 'sleep 5'
+
+        //     }
+        // }
 
 //         stage('VM2') {
 //             steps {
