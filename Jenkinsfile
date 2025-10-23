@@ -106,7 +106,7 @@ pipeline {
 
         stage('Deploy to Production (VM3)') {
             steps {
-                sshAgent(credentials: 'ssh-key') {
+                sshAgent(credentials: ['ssh-key']) {
                     withCredentials([usernamePassword(credentialsId: 'muyumq-github', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_PAT')]) {
                         sh """
                         ssh -o StrictHostKeyChecking=no admin@192.168.56.106 '
