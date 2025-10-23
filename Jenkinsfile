@@ -107,18 +107,14 @@ pipeline {
         stage('Deploy to Production (VM3)') {
             steps {
                 sshAgent(credentials: ['ssh-key']) {
-                    withCredentials([usernamePassword(credentialsId: 'muyumq-github', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_PAT')]) {
-                        sh """
-                        ssh -o StrictHostKeyChecking=no admin@192.168.56.106 '
-                            echo ${GHCR_PAT} | docker login ghcr.io -u ${GHCR_USER} --password-stdin
-                            docker pull ghcr.io/ce-spdx-the-best/simple-api:latest
-                            docker stop production-api || true
-                            docker rm production-api || true
-                            docker run -d --name production-api -p 5000:5000 ghcr.io/ce-spdx-the-best/simple-api:latest
-                        '
-                        """
-                    }
-
+                    sh """
+                    ssh -o StrictHostKeyChecking=no admin@192.168.56.106 '
+                        docker pull ghcr.io/ce-spdx-the-best/simple-api:latest
+                        docker stop production-api || true
+                        docker rm production-api || true
+                        docker run -d --name production-api -p 5000:5000 ghcr.io/ce-spdx-the-best/simple-api:latest
+                    '
+                    """
                 }
             }
         }
