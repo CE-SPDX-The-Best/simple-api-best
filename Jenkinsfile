@@ -106,7 +106,7 @@ pipeline {
 
         stage('Deploy to Production (VM3)') {
             steps {
-                sshAgent(credentials: ['ssh-key']) {
+                sshagent(credentials: ['ssh-key']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no admin@192.168.56.106 '
                         docker pull ghcr.io/ce-spdx-the-best/simple-api:latest
