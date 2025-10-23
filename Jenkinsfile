@@ -5,36 +5,133 @@ pipeline {
         stage('Checkout') {
             steps {
                 // checkout scm
-                git credentialsId: 'muyumq-github', url: 'https://github.com/CE-SPDX-The-Best/simple-api-best.git', branch: 'main'
+                dir('simple-api') {
+                    git credentialsId: 'muyumq-github', url: 'https://github.com/CE-SPDX-The-Best/simple-api-best.git', branch: 'main'
+                }
+
+                dir('simple-api-robot') {
+                    git credentialsId: 'muyumq-github', url: 'https://github.com/CE-SPDX-The-Best/simple-api-best-robot.git', branch: 'main'
+                }
             }
         }
 
-        stage('Setup Environment & Install Dependencies') {
+        stage('Setup Environment (simple-api)') {
             steps {
-                echo "1. Creating Python virtual environment (venv)..."
-                // สร้างโฟลเดอร์ venv
-                sh 'python3 -m venv venv' 
+                dir('simple-api') {
+                    echo "1. Creating Python virtual environment (venv)..."
+                    // สร้างโฟลเดอร์ venv
+                    sh 'python3 -m venv venv' 
 
-                echo "2. Activating venv and installing requirements..."
-                // รันคำสั่งใน shell session เดียว
-                // 'source' จะ activate venv
-                // 'pip install' จะติดตั้งลงใน venv นั้นทันที
-                sh '''
-                   . venv/bin/activate
-                   pip install -r requirements.txt
-                   echo "--- Packages installed in venv: ---"
-                   pip list
-                '''
+                    echo "2. Activating venv and installing requirements..."
+                    // รันคำสั่งใน shell session เดียว
+                    // 'source' จะ activate venv
+                    // 'pip install' จะติดตั้งลงใน venv นั้นทันที
+                    sh '''
+                    . venv/bin/activate
+                    pip install -r requirements.txt
+                    echo "--- Packages installed in venv: ---"
+                    pip list
+                    '''
+                }
+            }
+        }
+
+        stage('Setup Environment (simple-api-robot)') {
+            // เข้าไปทำงานใน 'simple-api-robot'
+            dir('simple-api-robot') {
+                steps {
+                    sh 'python3 -m venv venv' 
+                    // Robot repo ก็ควรมี requirements.txt ของตัวเอง
+                    sh '''
+                       . venv/bin/activate
+                       pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Run Unittests') {
+            steps {
+                dir('simple-api') {
+                    sh '''
+                    . venv/bin/activate
+                    python -m unittest discover
+                    '''
+                }
             }
         }
         
-        // stage('Build-Run Web') {
-        //     steps {
-        //         sh 'docker compose up -d --build'
-        //         sh 'sleep 5'
+        stage('Build-Run simple-api') {
+            steps {
+                dir('simple-api') {
+                    sh 'docker compose up -d --build'
+                    sh 'sleep 5'
+                }
+            }
+        }
 
-        //     }
-        // }
+        stage('Run Robot Framework Tests') {
+            // เข้าไปทำงานใน 'simple-api-robot'
+            dir('simple-api-robot') {
+                steps {
+                    sh '''
+                       . venv/bin/activate
+                       echo "--- Using Robot from: $(which robot) ---"
+                       robot robot-test.robot 
+                    '''
+                }
+            }
+            // 'post' จะทำงานเสมอหลัง 'steps'
+            post {
+                always {
+                    // !!! สำคัญ: ต้องกลับไปที่ 'simple-api' เพื่อสั่ง 'down'
+                    dir('simple-api') {
+                        echo "Stopping docker-compose services..."
+                        sh 'docker-compose down'
+                    }
+                }
+            }
+        }
+
+        stage('Push to GHCR') {
+            dir('simple-api') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'muyumq-github', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_PAT')]) {
+                        sh "echo ${GHCR_PAT} | docker login ghcr.io -u ${GHCR_USER} --password-stdin"
+                        sh "docker tag simple-api:latest ghcr.io/ce-spdx-the-best/simpleapi:latest"
+                        sh "docker push ghcr.io/ce-spdx-the-best/simpleapi:latest"
+                    }
+                }
+            }
+        }
+
+        // --- STAGE 8: Deploy (ไม่ขึ้นกับ dir) ---
+        stage('Deploy to Production (VM3)') {
+            steps {
+                sshAgent(credentials: 'ssh-key') {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no admin@192.168.56.106 '
+                            docker pull ghcr.io/ce-spdx-the-best/simpleapi:latest
+                            docker stop production-api || true
+                            docker rm production-api || true
+                            docker run -d --name production-api -p 5000:5000 ghcr.io/ce-spdx-the-best/simpleapi:latest
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // ทำความสะอาด venv ทั้ง 2 ที่
+            echo "Cleaning up virtual environments..."
+            sh "rm -rf simple-api/venv"
+            sh "rm -rf simple-api-robot/venv"
+            
+            sh "docker logout ghcr.io || true"
+        }
+    }
 
 //         stage('VM2') {
 //             steps {
@@ -89,4 +186,3 @@ pipeline {
 //             }
 //         }
     }
-}
