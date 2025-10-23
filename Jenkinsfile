@@ -53,7 +53,7 @@ pipeline {
                 dir('simple-api') {
                     sh '''
                     . venv/bin/activate
-                    python -m unittest discover
+                    python -m unittest unit_test.py
                     '''
                 }
             }
