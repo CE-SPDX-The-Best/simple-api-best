@@ -37,11 +37,9 @@ pipeline {
         }
 
         stage('Setup Environment (simple-api-robot)') {
-            // เข้าไปทำงานใน 'simple-api-robot'
-            dir('simple-api-robot') {
-                steps {
+            steps {
+                dir('simple-api-robot') {
                     sh 'python3 -m venv venv' 
-                    // Robot repo ก็ควรมี requirements.txt ของตัวเอง
                     sh '''
                        . venv/bin/activate
                        pip install -r requirements.txt
@@ -71,9 +69,8 @@ pipeline {
         }
 
         stage('Run Robot Framework Tests') {
-            // เข้าไปทำงานใน 'simple-api-robot'
-            dir('simple-api-robot') {
-                steps {
+            steps {
+                dir('simple-api-robot') {
                     sh '''
                        . venv/bin/activate
                        echo "--- Using Robot from: $(which robot) ---"
@@ -94,18 +91,15 @@ pipeline {
         }
 
         stage('Push to GHCR') {
-            dir('simple-api') {
-                steps {
+            steps {
                     withCredentials([usernamePassword(credentialsId: 'muyumq-github', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_PAT')]) {
                         sh "echo ${GHCR_PAT} | docker login ghcr.io -u ${GHCR_USER} --password-stdin"
                         sh "docker tag simple-api:latest ghcr.io/ce-spdx-the-best/simpleapi:latest"
                         sh "docker push ghcr.io/ce-spdx-the-best/simpleapi:latest"
                     }
-                }
             }
         }
 
-        // --- STAGE 8: Deploy (ไม่ขึ้นกับ dir) ---
         stage('Deploy to Production (VM3)') {
             steps {
                 sshAgent(credentials: 'ssh-key') {
@@ -132,6 +126,7 @@ pipeline {
             sh "docker logout ghcr.io || true"
         }
     }
+}
 
 //         stage('VM2') {
 //             steps {
@@ -185,4 +180,3 @@ pipeline {
 //                 }
 //             }
 //         }
-    }
